@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">PruebaOlimpia</string>
+    <string name="name">Nombre</string>
+    <string name="id">Cédula</string>
+    <string name="address">Dirección</string>
+    <string name="city">Ciudad</string>
+    <string name="country">País</string>
+    <string name="phone">Cecular</string>
+    <string name="next">Siguiente</string>
+</resources>

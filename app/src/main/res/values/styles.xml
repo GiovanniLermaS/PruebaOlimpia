@@ -1,0 +1,15 @@
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="TextInputEditText" parent="AppTheme">
+        <item name="colorControlNormal">@color/blueDarkOpacity</item>
+        <item name="android:textColorHighlight">@color/purple</item>
+        <item name="colorControlActivated">@color/blueDarkOpacity</item>
+    </style>
+
+</resources>
