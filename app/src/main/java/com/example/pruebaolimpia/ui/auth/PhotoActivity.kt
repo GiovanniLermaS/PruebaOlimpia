@@ -1,135 +1,186 @@
 package com.example.pruebaolimpia.ui.auth
 
+import android.Manifest
 import android.app.Activity
+import android.content.ContentResolver
 import android.content.Intent
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
-import com.example.pruebaolimpia.BuildConfig
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider.getUriForFile
 import com.example.pruebaolimpia.R
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.activity_photo.*
 import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
-import android.media.MediaScannerConnection
-import android.graphics.Bitmap
-import android.widget.Toast
-import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.R
-
 
 
 class PhotoActivity : AppCompatActivity(), View.OnClickListener {
 
-    private val REQUEST_TAKE_PHOTO = 100
+    private val REQUEST_IMAGE_CAPTURE = 0
 
-    private val REQUEST_GALLERY_PHOTO = 200
+    private val REQUEST_GALLERY_IMAGE = 1
 
-    private var mPhotoFile: File? = null
+    private var fileName: String? = null
+
+    private val IMAGE_COMPRESSION = 80
+
+    private val ASPECT_RATIO_X = 15f
+
+    private val ASPECT_RATIO_Y = 20f
+
+    private val bitmapMaxWidth = 1000
+
+    private val bitmapMaxHeight = 1000
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photo)
     }
 
-    fun choosePhotoFromGallary() {
-        val galleryIntent = Intent(
-            Intent.ACTION_PICK,
-            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        )
-        startActivityForResult(galleryIntent, GALLERY)
-    }
-
-    private fun takePhotoFromCamera() {
-        val intent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
-        startActivityForResult(intent, CAMERA)
-    }
-
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == this.RESULT_CANCELED) {
-            return
-        }
-        if (requestCode == GALLERY) {
-            if (data != null) {
-                val contentURI = data.data
-                try {
-                    val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
-                    val path = saveImage(bitmap)
-                    Toast.makeText(this@MainActivity, "Image Saved!", Toast.LENGTH_SHORT).show()
-                    imageview.setImageBitmap(bitmap)
-
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    Toast.makeText(this@MainActivity, "Failed!", Toast.LENGTH_SHORT).show()
-                }
-
-            }
-
-        } else if (requestCode == CAMERA) {
-            val thumbnail = data!!.extras!!.get("data") as Bitmap?
-            imageview.setImageBitmap(thumbnail)
-            saveImage(thumbnail!!)
-            Toast.makeText(this@MainActivity, "Image Saved!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun saveImage(myBitmap: Bitmap): String {
-        val bytes = ByteArrayOutputStream()
-        myBitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
-        val wallpaperDirectory = File(
-            Environment.getExternalStorageDirectory() + IMAGE_DIRECTORY
-        )
-        // have the object build the directory structure, if needed.
-        if (!wallpaperDirectory.exists()) {
-            wallpaperDirectory.mkdirs()
-        }
-
-        try {
-            val f = File(
-                wallpaperDirectory, Calendar.getInstance()
-                    .timeInMillis.toString() + ".jpg"
-            )
-            f.createNewFile()
-            val fo = FileOutputStream(f)
-            fo.write(bytes.toByteArray())
-            MediaScannerConnection.scanFile(
-                this,
-                arrayOf(f.getPath()),
-                arrayOf("image/jpeg"), null
-            )
-            fo.close()
-            Log.d("TAG", "File Saved::---&gt;" + f.getAbsolutePath())
-
-            return f.getAbsolutePath()
-        } catch (e1: IOException) {
-            e1.printStackTrace()
-        }
-
-        return ""
-    }
-
     override fun onClick(v: View?) {
         when (v) {
-            ivGallery -> {
+            ivGallery ->
+                chooseImageFromGallery()
+            ivCamera ->
+                takeCameraImage()
+        }
+    }
 
-            }
-            ivCamera -> {
+    private fun getCacheImagePath(fileName: String): Uri {
+        val path = File(externalCacheDir, "camera")
+        if (!path.exists()) path.mkdirs()
+        val image = File(path, fileName)
+        return getUriForFile(this, "$packageName.provider", image)
+    }
 
+    private fun takeCameraImage() {
+        Dexter.withActivity(this)
+            .withPermissions(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            .withListener(object : MultiplePermissionsListener {
+
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                    if (report.areAllPermissionsGranted()) {
+                        fileName = System.currentTimeMillis().toString() + ".jpg"
+                        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        takePictureIntent.putExtra(
+                            MediaStore.EXTRA_OUTPUT,
+                            getCacheImagePath(fileName!!)
+                        )
+                        if (takePictureIntent.resolveActivity(packageManager) != null) {
+                            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
+                        }
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: MutableList<com.karumi.dexter.listener.PermissionRequest>?,
+                    token: PermissionToken?
+                ) {
+                    token?.continuePermissionRequest()
+                }
+            }).check()
+    }
+
+    private fun chooseImageFromGallery() {
+        Dexter.withActivity(this)
+            .withPermissions(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            .withListener(object : MultiplePermissionsListener {
+
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                    if (report.areAllPermissionsGranted()) {
+                        val pickPhoto = Intent(
+                            Intent.ACTION_PICK,
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                        )
+                        startActivityForResult(pickPhoto, REQUEST_GALLERY_IMAGE)
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: MutableList<com.karumi.dexter.listener.PermissionRequest>?,
+                    token: PermissionToken?
+                ) {
+                    token?.continuePermissionRequest()
+                }
+            }).check()
+    }
+
+    private fun cropImage(sourceUri: Uri) {
+        val destinationUri = Uri.fromFile(File(cacheDir, queryName(contentResolver, sourceUri)))
+        val options = UCrop.Options()
+        options.setCompressionQuality(IMAGE_COMPRESSION)
+        options.setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+        options.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+        options.setActiveWidgetColor(ContextCompat.getColor(this, R.color.colorPrimary))
+
+        options.withAspectRatio(ASPECT_RATIO_X, ASPECT_RATIO_Y)
+
+        options.withMaxResultSize(bitmapMaxWidth, bitmapMaxHeight)
+
+        UCrop.of(sourceUri, destinationUri)
+            .withOptions(options)
+            .start(this)
+    }
+
+    private fun handleUCropResult(data: Intent?) {
+        if (data == null) {
+            setResultCancelled()
+            return
+        }
+        val resultUri = UCrop.getOutput(data)
+        setResultOk(resultUri)
+    }
+
+    private fun queryName(resolver: ContentResolver, uri: Uri): String {
+        val returnCursor = resolver.query(uri, null, null, null, null)!!
+        val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        returnCursor.moveToFirst()
+        val name = returnCursor.getString(nameIndex)
+        returnCursor.close()
+        return name
+    }
+
+    private fun setResultOk(imagePath: Uri?) {
+        cIVProfilePicture.setImageURI(imagePath)
+    }
+
+    private fun setResultCancelled() {
+        val intent = Intent()
+        setResult(Activity.RESULT_CANCELED, intent)
+        finish()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            REQUEST_IMAGE_CAPTURE -> if (resultCode == Activity.RESULT_OK) {
+                cropImage(getCacheImagePath(fileName!!))
+            } else {
+                setResultCancelled()
             }
+            REQUEST_GALLERY_IMAGE -> if (resultCode == Activity.RESULT_OK) {
+                val imageUri = data!!.data
+                cropImage(imageUri!!)
+            } else {
+                setResultCancelled()
+            }
+            UCrop.REQUEST_CROP -> if (resultCode == Activity.RESULT_OK) {
+                handleUCropResult(data)
+            } else {
+                setResultCancelled()
+            }
+            UCrop.RESULT_ERROR -> {
+                setResultCancelled()
+            }
+            else -> setResultCancelled()
         }
     }
 }
