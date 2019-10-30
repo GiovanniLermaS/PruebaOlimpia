@@ -6,7 +6,7 @@
     <string name="address">Dirección</string>
     <string name="city">Ciudad</string>
     <string name="country">País</string>
-    <string name="phone">Cecular</string>
+    <string name="phone">Celular</string>
     <string name="next">Siguiente</string>
     <string name="errorInternet">Problemas de conexión</string>
     <string name="noInternet">No podemos acceder a la red. \\nVerifica tu conexión o vuelve a intentarlo en unos minutos.</string>
@@ -17,4 +17,7 @@
     <string name="bluetooth">Bluetooh</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
+    <string name="noImage">No hay imágen</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
 </resources>

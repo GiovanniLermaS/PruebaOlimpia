@@ -1,14 +1,18 @@
 package com.example.pruebaolimpia.ui.auth
 
 import android.bluetooth.BluetoothAdapter
+import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.pruebaolimpia.R
+import com.example.pruebaolimpia.data.AppDatabase
+import com.example.pruebaolimpia.data.entities.User
 import com.example.pruebaolimpia.ui.broadcast.ConnectivityReceiver
 import com.example.pruebaolimpia.ui.global.GlobalApp
+import com.example.pruebaolimpia.util.Coroutines
 import kotlinx.android.synthetic.main.activity_bluetooth_wifi.*
 
 class BluetoothWifiActivity : AppCompatActivity(),
@@ -39,7 +43,16 @@ class BluetoothWifiActivity : AppCompatActivity(),
 
     override fun onClick(v: View?) {
         when (v) {
-
+            btNextB -> {
+                Coroutines.main {
+                    val userDao = AppDatabase.invoke(this).getUserDao()
+                    val user = userDao.getUser().value as User
+                    user.isWifi = if (connectivityReceiver.isWifiConnected()) 1 else 0
+                    user.isBluetooth = if (connectivityReceiver.isBluetoothConnect()) 1 else 0
+                    userDao.upsert(user)
+                    startActivity(Intent(this, SaveActivity::class.java))
+                }
+            }
         }
     }
 

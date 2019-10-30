@@ -9,10 +9,14 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider.getUriForFile
 import com.example.pruebaolimpia.R
+import com.example.pruebaolimpia.data.AppDatabase
+import com.example.pruebaolimpia.data.entities.User
+import com.example.pruebaolimpia.util.Coroutines
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -40,6 +44,8 @@ class PhotoActivity : AppCompatActivity(), View.OnClickListener {
 
     private val bitmapMaxHeight = 1000
 
+    private var profileImage: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photo)
@@ -51,8 +57,19 @@ class PhotoActivity : AppCompatActivity(), View.OnClickListener {
                 chooseImageFromGallery()
             ivCamera ->
                 takeCameraImage()
-            btNextP ->
-                startActivity(Intent(this, GeolocationActivity::class.java))
+            btNextP -> {
+                if (profileImage == null)
+                    Toast.makeText(this, getString(R.string.noImage), Toast.LENGTH_SHORT).show()
+                else {
+                    Coroutines.main {
+                        val userDao = AppDatabase.invoke(this).getUserDao().getUser().value?.address
+                      /*  val user = userDao.getUser().value as User
+                        user.image = profileImage.toString()
+                        userDao.upsert(user)
+                        startActivity(Intent(this, GeolocationActivity::class.java))*/
+                    }
+                }
+            }
         }
     }
 
@@ -151,7 +168,8 @@ class PhotoActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setResultOk(imagePath: Uri?) {
-        cIVProfilePicture.setImageURI(imagePath)
+        profileImage = imagePath
+        cIVProfilePicture.setImageURI(profileImage)
     }
 
     private fun setResultCancelled() {

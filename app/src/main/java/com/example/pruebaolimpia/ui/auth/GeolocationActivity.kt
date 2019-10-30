@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.pruebaolimpia.R
+import com.example.pruebaolimpia.data.AppDatabase
+import com.example.pruebaolimpia.data.entities.User
 import com.example.pruebaolimpia.ui.broadcast.ConnectivityReceiver
 import com.example.pruebaolimpia.ui.broadcast.GpsReceiver
 import com.google.android.gms.common.ConnectionResult
@@ -34,6 +36,8 @@ class GeolocationActivity : AppCompatActivity(), OnMapReadyCallback,
     GpsReceiver.GpsReceiverListener, LocationListener, View.OnClickListener {
 
     private val MY_PERMISSIONS_REQUEST_LOCATION = 99
+
+    private var latLngOrigin: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,8 +130,14 @@ class GeolocationActivity : AppCompatActivity(), OnMapReadyCallback,
 
     override fun onClick(v: View?) {
         when (v) {
-            btNextG ->
+            btNextG -> {
+                val userDao = AppDatabase.invoke(this).getUserDao()
+                val user = userDao.getUser().value as User
+                user.latitude = latLngOrigin?.latitude
+                user.longitude = latLngOrigin?.longitude
+                userDao.upsert(user)
                 startActivity(Intent(this, BluetoothWifiActivity::class.java))
+            }
         }
     }
 
@@ -196,7 +206,7 @@ class GeolocationActivity : AppCompatActivity(), OnMapReadyCallback,
     }
 
     override fun onLocationChanged(location: Location?) {
-        val latLngOrigin = LatLng(location!!.latitude, location.longitude)
+        latLngOrigin = LatLng(location!!.latitude, location.longitude)
         mGoogleMap?.moveCamera(CameraUpdateFactory.newLatLng(latLngOrigin))
         mGoogleMap?.animateCamera(CameraUpdateFactory.zoomTo(15f))
         if (mGoogleApiClient != null)
