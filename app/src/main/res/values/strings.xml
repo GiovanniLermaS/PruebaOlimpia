@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">PruebaOlimpia</string>
+    <string name="API_KEY">AIzaSyCVCoSbWJOI3ogzwYgou66M59ANr6OViUM</string>
     <string name="name">Nombre</string>
     <string name="id">Cédula</string>
     <string name="address">Dirección</string>
@@ -7,4 +8,13 @@
     <string name="country">País</string>
     <string name="phone">Cecular</string>
     <string name="next">Siguiente</string>
+    <string name="errorInternet">Problemas de conexión</string>
+    <string name="noInternet">No podemos acceder a la red. \\nVerifica tu conexión o vuelve a intentarlo en unos minutos.</string>
+    <string name="error_gps">Servicios de ubicación desactivados</string>
+    <string name="no_gps">Habilite los servicios de ubicación</string>
+    <string name="habilitar">HABILITAR</string>
+    <string name="wifi">Wifi</string>
+    <string name="bluetooth">Bluetooh</string>
+    <string name="yes">Si</string>
+    <string name="no">No</string>
 </resources>

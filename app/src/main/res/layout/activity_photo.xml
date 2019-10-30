@@ -51,13 +51,14 @@
             app:layout_constraintTop_toBottomOf="@+id/ivGallery" />
 
         <Button
-            android:id="@+id/btNext"
+            android:id="@+id/btNextP"
             android:layout_width="230dp"
             android:layout_height="60dp"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="20dp"
             android:background="@color/blueClearDark"
             android:text="@string/next"
+            android:onClick="onClick"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="14sp"
@@ -66,6 +67,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cIVProfilePicture" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

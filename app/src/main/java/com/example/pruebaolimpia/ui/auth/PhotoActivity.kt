@@ -51,6 +51,8 @@ class PhotoActivity : AppCompatActivity(), View.OnClickListener {
                 chooseImageFromGallery()
             ivCamera ->
                 takeCameraImage()
+            btNextP ->
+                startActivity(Intent(this, GeolocationActivity::class.java))
         }
     }
 
