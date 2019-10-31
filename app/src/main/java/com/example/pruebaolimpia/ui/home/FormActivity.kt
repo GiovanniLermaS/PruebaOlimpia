@@ -21,7 +21,8 @@ class FormActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v) {
             btNextF -> {
-                if (clForm.setWarningsRequestL()) return
+                if (clForm.setWarningsRequestL())
+                    return
                 else {
                     val user = User()
                     user.name = etxName.text.toString()
