@@ -1,5 +1,6 @@
 package com.example.pruebaolimpia.util.broadcast
 
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -22,7 +23,7 @@ class GpsReceiver : BroadcastReceiver() {
 
     fun isEnabled(): Boolean {
         val manager =
-            GlobalApp().getInstance()!!.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            GlobalApp(Application()).getInstance()!!.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 

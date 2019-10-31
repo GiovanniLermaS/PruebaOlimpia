@@ -1,5 +1,6 @@
 package com.example.pruebaolimpia.util.broadcast
 
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
