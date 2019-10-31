@@ -23,7 +23,7 @@ class GpsReceiver : BroadcastReceiver() {
 
     fun isEnabled(): Boolean {
         val manager =
-            GlobalApp(Application()).getInstance()!!.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            GlobalApp().getInstance()!!.applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         return manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 

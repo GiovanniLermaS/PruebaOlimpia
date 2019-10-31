@@ -20,4 +20,5 @@
     <string name="noImage">No hay imágen</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
+    <string name="requiredField">Campo requerido</string>
 </resources>
